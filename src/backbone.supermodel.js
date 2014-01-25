@@ -13,6 +13,18 @@ Backbone.SuperModel = (function(_, Backbone){
     return obj;
   };
 
+  // http://stackoverflow.com/a/5484764/386378
+  var setObjectValue = function(obj, keyPath, value) {
+    lastKeyIndex = keyPath.length-1;
+    for (var i = 0; i < lastKeyIndex; ++ i) {
+      key = keyPath[i];
+      if (!(key in obj))
+        obj[key] = {};
+      obj = obj[key];
+    }
+    obj[keyPath[lastKeyIndex]] = value;
+  };
+
   var Model = Backbone.Model.extend({
     relations: {},
     unsafeAttributes: [],
@@ -56,6 +68,7 @@ Backbone.SuperModel = (function(_, Backbone){
       path = path.split('.');
       var lastKeyIndex = path.length - 1;
       var obj = this;
+      var nestedChanges = [];
 
       for (var i = 0; i < lastKeyIndex; ++i) {
         var key = path[i];
@@ -99,21 +112,26 @@ Backbone.SuperModel = (function(_, Backbone){
       this.changed = {};
     },
 
-    _triggerChanges: function(changes, options) {
+    _triggerChanges: function(changes, options, changeValue) {
+
       if (changes.length) this._pending = true;
       for (var i = 0, l = changes.length; i < l; i++) {
-        var changeValue = this.get(changes[i]);
+        if (!changeValue) {
+          changeValue = this.get(changes[i]);
+        }
+
         this.trigger('change:' + changes[i], this, changeValue, options);
       }
     },
 
     _setChange: function(attr, val, force) {
       var currentValue = this.get(attr);
+      attr = attr.split('.');
       if (!_.isEqual(currentValue, val) || force) {
-        this.changed[attr] = val;
+        setObjectValue(this.changed, attr, val);
         return true;
       } else {
-        delete this.changed[attr];
+        setObjectValue(this.changed, attr, undefined);
         return false;
       }
     },
@@ -224,8 +242,11 @@ Backbone.SuperModel = (function(_, Backbone){
       return attributes;
     },
 
-    // Get the previous value of an attribute, recorded at the time the last
-    // `"change"` event was fired.
+    hasChanged: function(attr) {
+      if (attr == null) return !_.isEmpty(this.changed);
+      return getObjectValue(this.changed, attr);
+    },
+
     previous: function(attr) {
       if (attr == null || !this._previousAttributes) return null;
       return getObjectValue(this._previousAttributes, attr);

@@ -1,8 +1,8 @@
 var SuperModel = require('../build/backbone.supermodel.amd');
 
 var model = new SuperModel();
-model.set('attribute', 'value');
+model.set('nested.attribute', 'value');
 
 module.exports = function() {
-  model.get('attribute');  
+  model.get('nested.attribute');  
 }

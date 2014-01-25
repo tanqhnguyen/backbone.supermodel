@@ -1,7 +1,7 @@
 var should = require('should')
   , _ = require('underscore')._
   , Backbone = require('backbone')
-  , SuperModel = require('./build/backbone.supermodel.amd')
+  , SuperModel = require('./')
 
 
 var Owner = SuperModel.extend({
@@ -46,8 +46,14 @@ describe('Backbone.SuperModel', function(){
     should(this.zoo.get('location.city')).eql(city);
     should(this.zoo.get('location.number')).eql(number);
     should(this.zoo.get('location.open')).eql(open);
+
     this.zoo.set('location.address', city);
     should(this.zoo.get('location.address')).eql(city);
+
+    this.zoo.set('location.test.nested', 123);
+    this.zoo.set('location.test.nested', 'blabla');
+    should(this.zoo.get('location.test.nested')).eql('blabla');
+    should(this.zoo.get('location.test').get('nested')).eql('blabla');
 
     this.zoo.set('name', name);
     should(this.zoo.get('name')).eql(name);
@@ -113,6 +119,9 @@ describe('Backbone.SuperModel', function(){
     should(this.zoo.get('location')).be.an.instanceOf(SuperModel);
     should(this.zoo.get('location.address')).be.eql(nested.location.address);
     should(this.zoo.get('location.map')).be.an.instanceOf(SuperModel);
+
+    nested.location.address = 'new address';
+    should(this.zoo.get('location.address')).be.eql('address');
   });
 
   it('sets array', function(){
@@ -191,8 +200,8 @@ describe('Backbone.SuperModel', function(){
   it('supports changedAttributes()', function(){
     var bla = 'bla bla bla';
     this.zoo.set('something.else', bla);
-    
-    should(this.zoo.changedAttributes()['something.else']).be.equal(bla);
+
+    should(this.zoo.changedAttributes().something.else).be.equal(bla);
     should(this.zoo.get('something').changedAttributes()['else']).be.equal(bla);
   });
 
@@ -214,24 +223,32 @@ describe('Backbone.SuperModel', function(){
     should(this.zoo.get('something').previous('else')).be.equal(123);
   });
 
-  it('supports normal change events on the main model', function(done){
+  it('supports normal change events on the main model', function(){
     var bla = 'bla bla bla';
-    this.zoo.on('change:something.else', function(){
-      should(this.zoo.get('something.else')).equal(bla);
-      done();
+    this.zoo.on('change:something.else', function(model, options){
+      should(model.get('something.else')).equal(bla);
     }, this);
 
     this.zoo.set('something.else', bla);
   });
 
-  it('supports change events on the nested model', function(done){
+  it('supports change events on the nested model', function(){
     var bla = 'bla bla bla';
     this.zoo.set('something.else', 123);
-    this.zoo.get('something').on('change:else', function(){
-      should(this.zoo.get('something.else')).equal(bla);
-      done();
+    this.zoo.get('something').on('change:else', function(model, options){
+      should(model.get('else')).equal(bla);
     }, this);
     this.zoo.set('something.else', bla);
+  });
+
+  it('supports change events on the second level nested model', function(){
+    var bla = 'bla bla bla';
+    this.zoo.set('some.other.thing', 123);
+    this.zoo.get('some').on('change:other.thing', function(model, options){
+      should(model.get('other.thing')).equal(bla);
+    }, this);
+
+    this.zoo.set('some.other.thing', bla);
   });
 
   it('supports relations', function(){
