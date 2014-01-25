@@ -1,2 +1,3 @@
 node_modules
 benchmarks/results.csv
+npm-debug.log

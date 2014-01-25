@@ -1,7 +1,7 @@
 {
   "name": "backbone.supermodel",
   "description": "An improved Backbone.Model with a bunch of extra features",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "devDependencies": {
     "grunt-preprocess": "~4.0.0",
     "grunt": "~0.4.2",
