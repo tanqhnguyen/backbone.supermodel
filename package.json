@@ -1,0 +1,34 @@
+{
+  "name": "backbone.supermodel",
+  "description": "An improved Backbone.Model with a bunch of extra features",
+  "version": "1.0.0",
+  "devDependencies": {
+    "grunt-preprocess": "~4.0.0",
+    "grunt": "~0.4.2",
+    "grunt-contrib-jshint": "~0.8.0",
+    "grunt-contrib-uglify": "~0.3.0",
+    "grunt-mocha": "~0.4.9",
+    "should": "~2.1.1",
+    "grunt-mocha-test": "~0.8.2",
+    "grunt-benchmark": "~0.2.0"
+  },
+  "homepage": "https://github.com/laoshanlung/backbone.supermodel",
+  "keywords": [
+    "backbone",
+    "model",
+    "nested model",
+    "model relations"
+  ],
+  "author": {
+    "name": "Tan Nguyen",
+    "email": "laoshanlung@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/laoshanlung/backbone.supermodel.git"
+  },
+  "dependencies": {
+    "backbone": "~1.1.0",
+    "underscore": "~1.5.2"
+  }
+}
