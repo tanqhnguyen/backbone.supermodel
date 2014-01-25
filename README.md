@@ -1,6 +1,20 @@
 # Backbone.SuperModel
 Super as in fashion supermodel, not supernatural power. `SuperModel` extend `Backbone.Model` directly and override several of `Backbone.Model` methods to add support for nested attributes and many other features (coming soon!)
 
+## Install
+### Using NPM
+```
+npm install backbone.supermodel
+```
+
+### Using AMD script loader
+* Copy `build/backbone.supermodel.amd.js` to your project
+* Load it with `require['path/to/backbone.supermodel.amd']` and make sure that your have `underscore` and `backbone` stup correctly
+
+### Use it the old fashion way
+* Load `build/backbone.supermodel.js` in `<head>` or at the end of `<body>`
+* Make sure that you have `underscore` and `backbone` loaded before that
+
 ## Nested attribute
 It is quite often that nested attributes are used in an application. Considering this object structure
 ```js
@@ -126,6 +140,35 @@ At the moment, the relation must be an instance of `Backbone.Model` or `Backbone
 * More docs
 * More examples
 * More features
+* Improve performance
+
+# Benchmarks
+```bash
+Running benchmark model_get [benchmarks/model_get.js]...
+>> model_get x 48,381,420 ops/sec ±0.96% (93 runs sampled)
+
+Running benchmark model_set [benchmarks/model_set.js]...
+>> model_set x 300,337 ops/sec ±1.49% (96 runs sampled)
+
+Running benchmark model_setget [benchmarks/model_setget.js]...
+>> model_setget x 130,590 ops/sec ±1.49% (95 runs sampled)
+
+Running benchmark supermodel_get [benchmarks/supermodel_get.js]...
+>> supermodel_get x 4,487,165 ops/sec ±0.61% (98 runs sampled)
+
+Running benchmark supermodel_nested_get [benchmarks/supermodel_nested_get.js]...
+>> supermodel_nested_get x 1,999,848 ops/sec ±1.30% (95 runs sampled)
+
+Running benchmark supermodel_nested_set [benchmarks/supermodel_nested_set.js]...
+>> supermodel_nested_set x 45,619 ops/sec ±1.62% (95 runs sampled)
+
+Running benchmark supermodel_set [benchmarks/supermodel_set.js]...
+>> supermodel_set x 68,673 ops/sec ±1.12% (99 runs sampled)
+
+Running benchmark supermodel_setget [benchmarks/supermodel_setget.js]...
+>> supermodel_setget x 78,513 ops/sec ±2.04% (94 runs sampled)
+```
+It is obviously slower than the original `Backbone.Model`
 
 # Development
 `Gruntfile.js` and `package.json` are your friends
