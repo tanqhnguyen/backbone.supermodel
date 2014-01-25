@@ -9,7 +9,7 @@ npm install backbone.supermodel
 
 ### Using AMD script loader
 * Copy `build/backbone.supermodel.amd.js` to your project
-* Load it with `require['path/to/backbone.supermodel.amd']` and make sure that your have `underscore` and `backbone` stup correctly
+* Load it with `require(['path/to/backbone.supermodel.amd'], function(SuperModel){})` and make sure that your have `underscore` and `backbone` stup correctly
 
 ### Use it the old fashion way
 * Load `build/backbone.supermodel.js` in `<head>` or at the end of `<body>`
