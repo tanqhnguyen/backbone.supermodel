@@ -24,6 +24,7 @@ var Zoo = SuperModel.extend({
 describe('Backbone.SuperModel', function(){
   beforeEach(function(){
     this.zoo = new Zoo();
+    this.doc = new Backbone.Model();
   });
 
   it('sets normal 2-level nested attributes', function(){
@@ -185,7 +186,7 @@ describe('Backbone.SuperModel', function(){
     should(model.get('normal')).be.equal('string');
   });
 
-  it('supports hasChanged()', function(){
+  it('hasChanged()', function(){
     this.zoo.set('something.else', 'bla bla bla');
 
     should(this.zoo.hasChanged('something.else')).be.ok;
@@ -196,7 +197,7 @@ describe('Backbone.SuperModel', function(){
     should(this.zoo.get('some').hasChanged('array')).be.ok;
   });
 
-  it('supports changedAttributes()', function(){
+  it('changedAttributes()', function(){
     var bla = 'bla bla bla';
     this.zoo.set('something.else', bla);
 
@@ -204,7 +205,7 @@ describe('Backbone.SuperModel', function(){
     should(this.zoo.get('something').changedAttributes()['else']).be.equal(bla);
   });
 
-  it('supports previousAttributes()', function(){
+  it('previousAttributes()', function(){
     var bla = 'bla bla bla';
     this.zoo.set('something.else', 123);
     this.zoo.set('something.else', bla);
@@ -212,7 +213,7 @@ describe('Backbone.SuperModel', function(){
     should(this.zoo.get('something').previousAttributes().else).be.equal(123);
   });
 
-  it('supports previous()', function(){
+  it('previous()', function(){
     var bla = 'bla bla bla';
     this.zoo.set('something.else', 123);
     this.zoo.set('something.else', bla);
@@ -223,17 +224,18 @@ describe('Backbone.SuperModel', function(){
 
   it('supports normal change events on the main model', function(){
     var bla = 'bla bla bla';
-    this.zoo.on('change:something.else', function(model, options){
+    this.zoo.on('change:something.else', function(model, newValue){
+      should(model.hasChanged('something.else')).be.ok;
+      should(newValue).equal(bla);
       should(model.get('something.else')).equal(bla);
-    }, this);
-
-    this.zoo.set('something.else', bla);
+    }, this)
+    .set('something.else', bla);
   });
 
   it('supports change events on the nested model', function(){
     var bla = 'bla bla bla';
     this.zoo.set('something.else', 123);
-    this.zoo.get('something').on('change:else', function(model, options){
+    this.zoo.get('something').on('change:else', function(model, newValue){
       should(model.get('else')).equal(bla);
     }, this);
     this.zoo.set('something.else', bla);
@@ -242,7 +244,7 @@ describe('Backbone.SuperModel', function(){
   it('supports change events on the second level nested model', function(){
     var bla = 'bla bla bla';
     this.zoo.set('some.other.thing', 123);
-    this.zoo.get('some').on('change:other.thing', function(model, options){
+    this.zoo.get('some').on('change:other.thing', function(model, newValue){
       should(model.get('other.thing')).equal(bla);
     }, this);
 
@@ -266,4 +268,50 @@ describe('Backbone.SuperModel', function(){
     should(this.zoo.get('animals')).be.an.instanceOf(Animals);
   });
 
+  it('escape()', function(){
+    this.zoo.set('nested.value', 'Bill & Bob');
+    should(this.zoo.escape('nested.value')).be.equal('Bill &amp; Bob');
+  });
+
+  it('has()', function(){
+    this.zoo.set('nested.value', 'test');
+    should(this.zoo.has('nested.value')).be.ok;
+  });
+
+  it('unset()', function(){
+    this.zoo.set('nested.value', 'test');
+    this.zoo.unset('nested.value');
+    should(this.zoo.has('nested.value')).not.be.ok;
+    should(this.zoo.hasChanged('nested.value')).be.ok;
+  });
+
+  // the following tests are from Backbone with the title renamed and some
+  // modifications in order to be used with mocha and should
+
+  it("prevent nested change events from clobbering previous attributes", function() {
+    new SuperModel()
+    .on('change:nested.value', function(model, newState) {
+      should(model.previous('nested.value')).not.be.ok;
+      should(newState).be.equal('hello');
+      // Fire a nested change event.
+      model.set({'nested.value': 'whatever'});
+    })
+    .on('change:nested.value', function(model, newState) {
+      should(model.previous('nested.value')).not.be.ok;
+      should(newState).be.equal('hello');
+    })
+    .set({state: 'hello'});
+  });
+
+  it("use the same comparison for hasChanged/set", function() {
+    var changed = 0, model = new SuperModel({'a.b': null});
+    model.on('change', function() {
+      should(this.hasChanged('a.b')).be.ok;
+    })
+    .on('change:a.b', function() {
+      changed++;
+    })
+    .set({'a.b': undefined});
+    should(changed).be.equal(1);
+  });
 });

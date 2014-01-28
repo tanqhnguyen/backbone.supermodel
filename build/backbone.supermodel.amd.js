@@ -9,9 +9,17 @@
 }(this, function (_, Backbone) {
 
   Backbone.SuperModel = (function(_, Backbone){
+    var processKeyPath = function(keyPath) {
+      if (_.isString(keyPath)) {
+        keyPath = keyPath.split('.');
+      }
+      return keyPath;    
+    };
+  
     // http://stackoverflow.com/a/16190716/386378
     var getObjectValue = function(obj, path, def){
-      path = path.split('.');
+      path = processKeyPath(path);
+      
       var len = path.length;
       for(var i = 0; i < len; i++){
           if(!obj || typeof obj !== 'object') return def;
@@ -22,8 +30,10 @@
       return obj;
     };
   
-    // http://stackoverflow.com/a/5484764/386378
-    var setObjectValue = function(obj, keyPath, value) {
+    // based on the concept of // http://stackoverflow.com/a/5484764/386378
+    var walkObject = function(obj, keyPath, doThing) {
+      keyPath = processKeyPath(keyPath);
+  
       lastKeyIndex = keyPath.length-1;
       for (var i = 0; i < lastKeyIndex; ++ i) {
         key = keyPath[i];
@@ -31,7 +41,40 @@
           obj[key] = {};
         obj = obj[key];
       }
-      obj[keyPath[lastKeyIndex]] = value;
+      doThing(obj, keyPath[lastKeyIndex]);
+    };
+  
+    var setObjectValue = function(obj, keyPath, value) {
+      walkObject(obj, keyPath, function(destination, lastKey){
+        destination[lastKey] = value;
+      });
+    };
+  
+    var deleteObjectKey = function(obj, keyPath) {
+      walkObject(obj, keyPath, function(destination, lastKey){
+        delete destination[lastKey];
+      });
+    };
+  
+    var hasObjectKey = function(obj, keyPath) {
+      var hasKey = false;
+      walkObject(obj, keyPath, function(destination, lastKey){
+        hasKey = _.has(destination, lastKey);
+      });
+      return hasKey;
+    };
+  
+    var walkNestedAttributes = function(model, keyPath, doThing) {
+      keyPath = processKeyPath(keyPath);
+  
+      var first = _.first(keyPath);
+      var nestedModel = model.get(first);
+  
+      if (nestedModel instanceof Backbone.Model) {
+        walkNestedAttributes(nestedModel, _.rest(keyPath), doThing);
+      } else {
+        doThing(model, keyPath);
+      }
     };
   
     var Model = Backbone.Model.extend({
@@ -73,11 +116,10 @@
         return false;
       },
   
-      _nestedSet: function(path, value) {
+      _nestedSet: function(path, value, options) {
         path = path.split('.');
         var lastKeyIndex = path.length - 1;
         var obj = this;
-        var nestedChanges = [];
   
         for (var i = 0; i < lastKeyIndex; ++i) {
           var key = path[i];
@@ -95,7 +137,7 @@
           for (var j in value) {
             var newPath = finalPath + '.' + j;
             // let _nestedSet do its things
-            obj._nestedSet(newPath, value[j]);
+            obj._nestedSet(newPath, value[j], options);
           }
         } else {
           if (this._valueForCollection(value)) {
@@ -108,11 +150,7 @@
             // maybe allow other methods as well? like reset
             collection.add(value);
           } else {
-            // a simplified flow for setting new value
-            obj._setChanging();
-            obj.attributes[finalPath] = value;
-            obj._setChange(finalPath, value, true);
-            obj._triggerChanges([finalPath], {});
+            obj.set(finalPath, value, {skipNested: true, forceChange: true});
           }
         }
       },
@@ -123,7 +161,6 @@
       },
   
       _triggerChanges: function(changes, options, changeValue) {
-  
         if (changes.length) this._pending = true;
         for (var i = 0, l = changes.length; i < l; i++) {
           if (!changeValue) {
@@ -134,14 +171,14 @@
         }
       },
   
-      _setChange: function(attr, val, force) {
+      _setChange: function(attr, val, options) {
         var currentValue = this.get(attr);
         attr = attr.split('.');
-        if (!_.isEqual(currentValue, val) || force) {
+        if (!_.isEqual(currentValue, val) || options.forceChange) {
           setObjectValue(this.changed, attr, val);
           return true;
         } else {
-          setObjectValue(this.changed, attr, undefined);
+          deleteObjectKey(this.changed, attr);
           return false;
         }
       },
@@ -181,20 +218,24 @@
         if (this.idAttribute in attrs) this.id = attrs[this.idAttribute];
   
         // For each `set` attribute, update or delete the current value.
+        var unsetAttribute = function(destination, realKey){
+          delete destination.attributes[realKey];
+        };
+  
         for (attr in attrs) {
           val = attrs[attr];
           
-          if (this._setChange(attr, val)) {
+          if (this._setChange(attr, val, options)) {
             changes.push(attr);
           }
   
           if (unset) {
-            this.set(attr, undefined, options);
+            walkNestedAttributes(this, attr, unsetAttribute);
           } else {
             if (skipNested) {
               this.attributes[attr] = val;
             } else {
-              this._nestedSet(attr, val);  
+              this._nestedSet(attr, val, options);  
             }
           }
         }
@@ -246,7 +287,7 @@
         });
         
         _.each(attributes, function(val, key){
-          if (_.isFunction(val.toJSON)) {
+          if (val && _.isFunction(val.toJSON)) {
             attributes[key] = val.toJSON();  
           }
         });
@@ -256,7 +297,7 @@
   
       hasChanged: function(attr) {
         if (attr == null) return !_.isEmpty(this.changed);
-        return getObjectValue(this.changed, attr);
+        return hasObjectKey(this.changed, attr);
       },
   
       previous: function(attr) {
