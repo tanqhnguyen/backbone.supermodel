@@ -3,7 +3,6 @@ var should = require('should')
   , Backbone = require('backbone')
   , SuperModel = require('./')
 
-
 var Owner = SuperModel.extend({
 
 });
@@ -209,7 +208,6 @@ describe('Backbone.SuperModel', function(){
     var bla = 'bla bla bla';
     this.zoo.set('something.else', 123);
     this.zoo.set('something.else', bla);
-
     should(this.zoo.previousAttributes().something.else).be.equal(123);
     should(this.zoo.get('something').previousAttributes().else).be.equal(123);
   });

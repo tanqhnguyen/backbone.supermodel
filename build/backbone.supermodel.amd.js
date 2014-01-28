@@ -9,8 +9,7 @@
 }(this, function (_, Backbone) {
 
   Backbone.SuperModel = (function(_, Backbone){
-  
-  // http://stackoverflow.com/a/16190716/386378
+    // http://stackoverflow.com/a/16190716/386378
     var getObjectValue = function(obj, path, def){
       path = path.split('.');
       var len = path.length;
@@ -106,6 +105,7 @@
               var _relation = this._getRelation(finalPath, value);
               collection = obj.attributes[finalPath] = new _relation();
             }
+            // maybe allow other methods as well? like reset
             collection.add(value);
           } else {
             // a simplified flow for setting new value
@@ -147,7 +147,7 @@
       },
   
       set: function(key, val, options) {
-        var attr, attrs, unset, changes, silent, changing, prev, current;
+        var attr, attrs, unset, changes, silent, changing, prev, current, skipNested;
         if (key == null) return this;
   
         // Handle both `"key", value` and `{key: value}` -style arguments.
@@ -228,9 +228,11 @@
           }
   
           var rest = _.rest(nestedAttrs).join('.');
-          if (nestedAttr instanceof Model) {
+  
+          if (_.isFunction(nestedAttr.get)) {
             return nestedAttr.get(rest);
           }
+  
           return nestedAttr[rest];
         }
         return this.attributes[attr];
@@ -244,8 +246,8 @@
         });
         
         _.each(attributes, function(val, key){
-          if (val instanceof Backbone.Model || val instanceof Backbone.Collection) {
-            attributes[key] = val.toJSON();
+          if (_.isFunction(val.toJSON)) {
+            attributes[key] = val.toJSON();  
           }
         });
   
