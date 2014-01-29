@@ -164,8 +164,8 @@ describe('Backbone.SuperModel', function(){
     should(this.zoo.get('empty').length).be.equal(0);
 
     should(this.zoo.get('location').at(0)).be.an.instanceOf(SuperModel);
-    should(this.zoo.get('location').at(0).get('name')).be.equal(locations[0].name)
-    should(this.zoo.get('location').at(0).get('nested.attr')).be.equal(locations[0].nested.attr)
+    should(this.zoo.get('location').at(0).get('name')).be.equal(locations[0].name);
+    should(this.zoo.get('location').at(0).get('nested.attr')).be.equal(locations[0].nested.attr);
   });
 
   it('initializes the model', function(){
@@ -313,5 +313,21 @@ describe('Backbone.SuperModel', function(){
     })
     .set({'a.b': undefined});
     should(changed).be.equal(1);
+  });
+
+  it("fire change:attribute callbacks after all changes have occurred", function() {
+    var model = new SuperModel;
+
+    var assertion = function() {
+      should(model.get('nested.a')).equal('a');
+      should(model.get('nested1.b')).equal('b');
+      should(model.get('nested2.c')).equal('c');
+    };
+
+    model.on('change:nested.a', assertion);
+    model.on('change:nested1.b', assertion);
+    model.on('change:nested2.c', assertion);
+
+    model.set({'nested.a': 'a', 'nested1.b': 'b', 'nested2.c': 'c'});
   });
 });

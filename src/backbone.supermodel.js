@@ -147,7 +147,7 @@ Backbone.SuperModel = (function(_, Backbone){
           // maybe allow other methods as well? like reset
           collection.add(value);
         } else {
-          obj.set(finalPath, value, {skipNested: true, forceChange: true});
+          obj.set(finalPath, value, {skipNested: true, forceChange: true});    
         }
       }
     },

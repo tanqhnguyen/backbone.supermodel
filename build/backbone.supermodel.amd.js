@@ -31,6 +31,9 @@
     };
   
     // based on the concept of // http://stackoverflow.com/a/5484764/386378
+    // not recursively walk through the keyPath of obj
+    // when reaching the end call doThing
+    // and pass the last obj and last key
     var walkObject = function(obj, keyPath, doThing) {
       keyPath = processKeyPath(keyPath);
   
@@ -64,6 +67,10 @@
       return hasKey;
     };
   
+    // recursively walk through a Backbone.Model model
+    // using keyPath
+    // when reaching the end, call doThing
+    // and pass the last model and last key
     var walkNestedAttributes = function(model, keyPath, doThing) {
       keyPath = processKeyPath(keyPath);
   
@@ -150,7 +157,7 @@
             // maybe allow other methods as well? like reset
             collection.add(value);
           } else {
-            obj.set(finalPath, value, {skipNested: true, forceChange: true});
+            obj.set(finalPath, value, {skipNested: true, forceChange: true});    
           }
         }
       },
