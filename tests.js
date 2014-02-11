@@ -4,11 +4,11 @@ var should = require('should')
   , SuperModel = require('./')
 
 var Owner = SuperModel.extend({
-
+  name: 'owner'
 });
 
 var Animal = SuperModel.extend({
-
+  name: 'animal'
 });
 
 var Animals = Backbone.Collection.extend({
@@ -16,6 +16,8 @@ var Animals = Backbone.Collection.extend({
 });
 
 var Zoo = SuperModel.extend({
+  name: 'zoo',
+
   relations: {
     'owner': Owner,
     'animals': Animals
@@ -285,6 +287,20 @@ describe('Backbone.SuperModel', function(){
     should(this.zoo.hasChanged('nested.value')).be.ok;
   });
 
+  it('can be used with Backbone.Collection normally', function(){
+    var animals = new Backbone.Collection();
+    var dog = new Animal({
+      name: 'Golden'
+    });
+    dog.set('food', {some: 'bones'}, {skipNested: true});
+
+    animals.add(dog);
+
+    should(animals.at(0)).be.an.instanceOf(Animal);
+    should(animals.at(0).get('name')).be.equal(dog.get('name'));
+    should(animals.at(0).get('food').some).be.equal('bones');
+  });
+
   // the following tests are from Backbone with the title renamed and some
   // modifications in order to be used with mocha and should
 
@@ -329,5 +345,71 @@ describe('Backbone.SuperModel', function(){
     model.on('change:nested2.c', assertion);
 
     model.set({'nested.a': 'a', 'nested1.b': 'b', 'nested2.c': 'c'});
+  });
+
+  it("supports backref to upper level", function(){
+    var anotherZoo = new Zoo({
+      'owner': {
+        name: 'Tan Nguyen'
+      },
+      'animals': [
+        {
+          name: 'duck'
+        },
+        {
+          name: 'platypus'
+        }
+      ]
+    });
+
+    should(anotherZoo.get('owner').zoo).be.an.instanceOf(Zoo);
+    should(anotherZoo.get('animals').zoo).be.an.instanceOf(Zoo);
+    should(anotherZoo.get('animals').zoo.cid).equal(anotherZoo.cid);
+    should(anotherZoo.get('owner').zoo.cid).equal(anotherZoo.cid);
+  });
+
+  it("toJSON()", function(){
+    var anotherZoo = new Zoo({
+      'owner': {
+        name: 'Tan Nguyen'
+      },
+      'animals': [
+        {
+          name: 'duck'
+        },
+        {
+          name: 'platypus'
+        }
+      ]
+    });
+
+    var json = anotherZoo.toJSON();
+    should(json.owner.name).equal(anotherZoo.get('owner.name'));
+    should(json.animals).be.an.instanceOf(Array);
+    should(json.animals.length).equal(anotherZoo.get('animals').size());
+  });
+
+  it("toJSON() with unsafeAttributes", function(){
+    var anotherZoo = new Zoo({
+      'owner': {
+        name: 'Tan Nguyen'
+      },
+      'animals': [
+        {
+          name: 'duck'
+        },
+        {
+          name: 'platypus'
+        }
+      ]
+    });
+    anotherZoo.unsafeAttributes = ['password'];
+    anotherZoo.set('password', 'something-strong');
+
+    var json = anotherZoo.toJSON();
+    should(json.owner.name).equal(anotherZoo.get('owner.name'));
+    should(json.animals).be.an.instanceOf(Array);
+    should(json.animals.length).equal(anotherZoo.get('animals').size());
+    should(json.password).equal(undefined);
   });
 });

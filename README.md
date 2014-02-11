@@ -82,6 +82,18 @@ var json = myStuff.toJSON();
 //   }
 // }
 ```
+By settings `unsafeAttributes` (an array or a function which returns an array), `toJSON` will exclude those attributes in the returned value
+```js
+var MyModel = Backbone.SuperModel.extend({
+  'unsafeAttributes': ['password']
+});
+
+var myModel = new MyModel({
+  'username': 'supermodel',
+  'password': 'secret'
+});
+myModel.toJSON(); // return {"username": "supermodel"}
+```
 
 ### Support `relations`
 By defining `relations`, `SuperModel` can automatically initiate the corresponding class when it processes the attributes
@@ -133,9 +145,43 @@ model.get('children').firstChild().name(); // returns 'First baby'
 ```
 At the moment, the relation must be an instance of `Backbone.Model` or `Backbone.Collection`
 
+### Support backward reference
+In some cases it might be useful that we can refer back to the upper level. For example, when rendering a list of posts, we might need to get the author information associated with each post. By setting `name` (can be a value or function), `SuperModel` will automatically build the back reference, if there is already an attribute with the same name, `SuperModel` will respect and skip it. The back reference is simply an attribute in the target model/collection in order to avoid circular reference when calling other methods such as `toJSON`
+
+```javascript
+var Post = Backbone.SuperModel.extend({
+
+});
+
+var Posts = Backbone.Collection.extend({
+  model: Post
+});
+
+var User = Backbone.SuperModel.extend({
+  name: 'user',
+  relations: {
+    'posts': Posts
+  }
+});
+
+var user = new User({
+  'username': 'supermodel'
+  'posts': [
+    {
+      'title': 'Post number 1'
+    },
+    {
+      'title': 'Post number 2'
+    }
+  ]
+});
+
+user.get('posts').at(0).user.get('username'); // return 'supermodel'
+```
+
 # TODOs
 * Support better validation
-* Support as many `Backbone.Model` method as possible
+* Support as many `Backbone.Model` methods as possible
 * More tests
 * More docs
 * More examples

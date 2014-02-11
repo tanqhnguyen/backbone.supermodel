@@ -77,6 +77,7 @@ Backbone.SuperModel = (function(_, Backbone){
   var Model = Backbone.Model.extend({
     relations: {},
     unsafeAttributes: [],
+    name: null, // set name so that children can refer back to
 
     _getRelation: function(attr, value) {
       var relation;
@@ -102,6 +103,15 @@ Backbone.SuperModel = (function(_, Backbone){
       return relation;
     },
 
+    _setupBackref: function(instance, options) {
+      var name = _.result(this, 'name');
+      // respect the attribute with the same name in relation
+      if (name && !instance[name]) {
+        instance[name] = this;
+      }
+      return instance;
+    },
+
     _valueForCollection: function(value) {
       if (_.isArray(value)) {
         if (value.length >= 1) {
@@ -124,7 +134,8 @@ Backbone.SuperModel = (function(_, Backbone){
         if (!check) {
           // to be Model or not to be Model!!!
           var relation = this._getRelation(key, value);
-          obj.attributes[key] = new relation();
+          var instance = new relation();
+          obj.attributes[key] = this._setupBackref(instance, options);
         }
         obj = obj.attributes[key];
       }
@@ -142,7 +153,8 @@ Backbone.SuperModel = (function(_, Backbone){
           var collection = obj.attributes[finalPath];
           if (!collection) {
             var _relation = this._getRelation(finalPath, value);
-            collection = obj.attributes[finalPath] = new _relation();
+            collection = new _relation();
+            obj.attributes[finalPath] = this._setupBackref(collection, options);
           }
           // maybe allow other methods as well? like reset
           collection.add(value);
