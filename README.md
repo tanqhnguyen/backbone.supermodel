@@ -180,12 +180,10 @@ user.get('posts').at(0).user.get('username'); // return 'supermodel'
 ```
 
 # TODOs
-* Support better validation
+* Support validation
 * Support as many `Backbone.Model` methods as possible
-* More tests
-* More docs
-* More examples
-* More features
+* ~~Support relations~~
+* ~~Support back reference~~
 * Improve performance
 
 # Benchmarks
