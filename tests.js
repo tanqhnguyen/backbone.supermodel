@@ -150,7 +150,7 @@ describe('Backbone.SuperModel', function(){
     this.zoo.set('booleans', booleans);
     this.zoo.set('empty', emptyArray);
     
-    should(this.zoo.get('location')).be.an.instanceOf(Backbone.Collection);
+    should(this.zoo.get('location') instanceof Backbone.Collection).be.equal(true);
     should(this.zoo.get('location').size()).be.equal(locations.length);
 
     should(this.zoo.get('gates')).be.an.instanceOf(Array);
@@ -162,7 +162,7 @@ describe('Backbone.SuperModel', function(){
     should(this.zoo.get('booleans')).be.an.instanceOf(Array);
     should(this.zoo.get('booleans').length).be.equal(booleans.length);
 
-    should(this.zoo.get('empty')).be.an.instanceOf(Backbone.Collection);
+    should(this.zoo.get('empty') instanceof Backbone.Collection).be.equal(true);
     should(this.zoo.get('empty').length).be.equal(0);
 
     should(this.zoo.get('location').at(0)).be.an.instanceOf(SuperModel);
@@ -411,5 +411,20 @@ describe('Backbone.SuperModel', function(){
     should(json.animals).be.an.instanceOf(Array);
     should(json.animals.length).equal(anotherZoo.get('animals').size());
     should(json.password).equal(undefined);
+  });
+
+  it("correctly converts second level array into collection", function(){
+    var model = new SuperModel({ prop1 : { prop2 : [{a:1}, {a:2}] } });
+    should(model.get('prop1')).be.an.instanceOf(Backbone.Model);
+    should(model.get('prop1.prop2')).be.an.instanceOf(Backbone.Collection);
+    should(model.get('prop1.prop2').size()).be.equal(2);
+  });
+
+  it("correctly converts third level array into collection", function(){
+    var model = new SuperModel({ prop1 : { prop2 : {prop3: [{a:1}, {a:2}]} } });
+    should(model.get('prop1')).be.an.instanceOf(Backbone.Model);
+    should(model.get('prop1.prop2')).be.an.instanceOf(Backbone.Model);
+    should(model.get('prop1.prop2.prop3')).be.an.instanceOf(Backbone.Collection);
+    should(model.get('prop1.prop2.prop3').size()).be.equal(2);
   });
 });

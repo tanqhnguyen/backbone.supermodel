@@ -98,11 +98,7 @@
         }
   
         if (value && !relation) {
-          if (this._valueForCollection(value)) {
-            relation = Collection; 
-          } else {
-            relation = Model;
-          }        
+          relation = Model;
         }
   
         // catch all the weird stuff
@@ -135,6 +131,7 @@
   
       _nestedSet: function(path, value, options) {
         path = path.split('.');
+  
         var lastKeyIndex = path.length - 1;
         var obj = this;
   
@@ -142,7 +139,8 @@
           var key = path[i];
           var check = obj.attributes[key];
           if (!check) {
-            // to be Model or not to be Model!!!
+            // initiate the relationship here
+            //var relation = Backbone.Model;
             var relation = this._getRelation(key, value);
             var instance = new relation();
             obj.attributes[key] = this._setupBackref(instance, options);
@@ -160,14 +158,16 @@
         } else {
           if (this._valueForCollection(value)) {
             // here we need to initiate the collection manually
-            var collection = obj.attributes[finalPath];
-            if (!collection) {
-              var _relation = this._getRelation(finalPath, value);
-              collection = new _relation();
-              obj.attributes[finalPath] = this._setupBackref(collection, options);
+            var _relation = this._getRelation(finalPath, value);
+  
+            if (_relation.prototype instanceof Backbone.Model) {
+              // if we dont have the Collection relation for this, use custom Collection
+              // because "value" should be used with a Collection
+              _relation = Collection;
             }
-            // maybe allow other methods as well? like reset
-            collection.add(value);
+            var collection = new _relation(value);
+            collection = this._setupBackref(collection, options);
+            obj.attributes[finalPath] = collection;
           } else {
             // prevent duplicated events due to "set"
             if (path.length == 1) {
