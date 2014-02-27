@@ -430,6 +430,7 @@ describe('Backbone.SuperModel', function(){
 
   it("supports clear", function(){
     var model = new SuperModel({
+      id: 1,
       prop1: 'value1', 
       'prop2.a': 'value2',
       'prop3': [
@@ -444,5 +445,6 @@ describe('Backbone.SuperModel', function(){
     should(model.get('prop2')).be.an.instanceOf(Backbone.Model);
     should(model.get('prop3')).be.an.instanceOf(Backbone.Collection);
     should(model.get('prop3').size()).be.equal(0);
+    should(model.id).be.not.ok;
   });
 });

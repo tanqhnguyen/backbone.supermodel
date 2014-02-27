@@ -325,6 +325,8 @@ Backbone.SuperModel = (function(_, Backbone){
     // Clear all attributes on the model, firing `"change"`.
     clear: function(options) {
       var attrs = {};
+      this.id = void 0;
+      
       for (var key in this.attributes) {
         var val = this.attributes[key];
         if (val instanceof Backbone.Model) {
