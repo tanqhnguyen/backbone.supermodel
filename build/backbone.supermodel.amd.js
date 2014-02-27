@@ -190,7 +190,6 @@
           if (!changeValue) {
             changeValue = this.get(changes[i]);
           }
-  
           this.trigger('change:' + changes[i], this, changeValue, options);
         }
       },
@@ -284,9 +283,6 @@
       },
   
       get: function(attr) {
-        if (!attr) {
-          return attr;
-        }
         var nestedAttrs = attr.split('.');
   
         if (nestedAttrs.length > 1) {
@@ -344,7 +340,7 @@
           } else if (val instanceof Backbone.Collection) {
             val.reset();
           } else {
-            this.attributes[key] = void 0;
+            this.unset(key);
           }
         }
       }

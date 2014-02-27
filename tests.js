@@ -428,7 +428,7 @@ describe('Backbone.SuperModel', function(){
   //   should(model.get('prop1.prop2.prop3').size()).be.equal(2);
   // });
 
-  it("supports clear", function(){
+  it("supports clear", function(done){
     var model = new SuperModel({
       id: 1,
       prop1: 'value1', 
@@ -438,6 +438,13 @@ describe('Backbone.SuperModel', function(){
         {'name': 'b'}
       ]
     });
+
+    model.get('prop2').on('change:a', function(model, newValue){
+      should(newValue).be.not.ok;
+
+      done();
+    });
+
     model.clear();
 
     should(model.get('prop1')).be.not.ok;
