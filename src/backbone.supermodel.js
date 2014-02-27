@@ -274,6 +274,9 @@ Backbone.SuperModel = (function(_, Backbone){
     },
 
     get: function(attr) {
+      if (!attr) {
+        return attr;
+      }
       var nestedAttrs = attr.split('.');
 
       if (nestedAttrs.length > 1) {
@@ -317,6 +320,21 @@ Backbone.SuperModel = (function(_, Backbone){
     previous: function(attr) {
       if (attr == null || !this._previousAttributes) return null;
       return getObjectValue(this._previousAttributes, attr);
+    },
+
+    // Clear all attributes on the model, firing `"change"`.
+    clear: function(options) {
+      var attrs = {};
+      for (var key in this.attributes) {
+        var val = this.attributes[key];
+        if (val instanceof Backbone.Model) {
+          val.clear();
+        } else if (val instanceof Backbone.Collection) {
+          val.reset();
+        } else {
+          this.attributes[key] = void 0;
+        }
+      }
     }
   });
 
