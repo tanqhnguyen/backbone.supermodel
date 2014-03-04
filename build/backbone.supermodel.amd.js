@@ -84,6 +84,11 @@
       }
     };
   
+    // a simple object is an object that does not come from "new"
+    var isSimpleObject = function(value) {
+      return Object.getPrototypeOf(Object.getPrototypeOf(value)) === null;
+    };
+  
     var Model = Backbone.Model.extend({
       relations: {},
       unsafeAttributes: [],
@@ -149,7 +154,7 @@
         }
   
         var finalPath = path[lastKeyIndex];
-        if (!_.isArray(value) && _.isObject(value)) {
+        if (!_.isArray(value) && _.isObject(value) && isSimpleObject(value)) {
           for (var j in value) {
             var newPath = finalPath + '.' + j;
             // let _nestedSet do its things
