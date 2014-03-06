@@ -472,4 +472,31 @@ describe('Backbone.SuperModel', function(){
     should(model.get('col')).be.an.instanceOf(Backbone.Collection);
     should(model.get('nested.attr')).be.an.instanceOf(AnotherClass);
   });
+
+  it("respects trigger:false in nested level", function(){
+    var supermodel = new SuperModel({
+      prop1: 'value1',
+      prop2: {
+        prop2a: "value2a",
+        prop2b: "value2b"
+      }
+    });
+    var model = new Backbone.Model();
+
+    supermodel.on('change:prop1', function(){
+      throw "NO!!!!";
+    });
+
+    supermodel.on('change:prop2.prop2a', function(){
+      throw "NO!!!!";
+    });
+
+    supermodel.set('prop1', 'abc', {silent: true});
+    supermodel.set('prop2.prop2a', 'abc', {silent: true});
+    supermodel.set({
+      prop1: "def"
+    }, {
+      silent: true
+    });
+  });
 });

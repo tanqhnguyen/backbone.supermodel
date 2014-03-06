@@ -168,7 +168,9 @@ Backbone.SuperModel = (function(_, Backbone){
           if (path.length == 1) {
             obj.attributes[finalPath] = value;
           } else {
-            obj.set(finalPath, value, {skipNested: true, forceChange: true});    
+            options.skipNested = true;
+            options.forceChange = true;
+            obj.set(finalPath, value, options);
           }
         }
       }
