@@ -300,9 +300,15 @@ Backbone.SuperModel = (function(_, Backbone){
     },
 
     toJSON: function(options) {
+      options = options || {};
       var unsafeAttributes = _.result(this, 'unsafeAttributes');
+
+      if (options.except) {
+        unsafeAttributes = _.union(unsafeAttributes, options.except);
+      }
+
       var attributes = _.clone(this.attributes);
-      _.each(this.unsafeAttributes, function(attr){
+      _.each(unsafeAttributes, function(attr){
         delete attributes[attr];
       });
       

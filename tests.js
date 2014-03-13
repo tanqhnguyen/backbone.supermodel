@@ -370,6 +370,7 @@ describe('Backbone.SuperModel', function(){
 
   it("toJSON()", function(){
     var anotherZoo = new Zoo({
+      'name': 'the zoo',
       'owner': {
         name: 'Tan Nguyen'
       },
@@ -383,10 +384,16 @@ describe('Backbone.SuperModel', function(){
       ]
     });
 
-    var json = anotherZoo.toJSON();
+    var json = anotherZoo.toJSON({
+      except: ['name']
+    });
+
     should(json.owner.name).equal(anotherZoo.get('owner.name'));
     should(json.animals).be.an.instanceOf(Array);
     should(json.animals.length).equal(anotherZoo.get('animals').size());
+    should(json.name).not.be.ok;
+
+    should(anotherZoo.get('name')).be.equal('the zoo');
   });
 
   it("toJSON() with unsafeAttributes", function(){
@@ -411,6 +418,8 @@ describe('Backbone.SuperModel', function(){
     should(json.animals).be.an.instanceOf(Array);
     should(json.animals.length).equal(anotherZoo.get('animals').size());
     should(json.password).equal(undefined);
+
+    should(anotherZoo.get('password')).be.equal('something-strong');
   });
 
   it("correctly converts second level array into collection", function(){
