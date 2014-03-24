@@ -94,6 +94,15 @@ Backbone.SuperModel = (function(_, Backbone){
     return relation;
   };
 
+  var setupBackref = function(obj, instance, options) {
+    var name = _.result(obj, 'name');
+    // respect the attribute with the same name in relation
+    if (name && !instance[name]) {
+      instance[name] = obj;
+    }
+    return instance;
+  };
+
   // a simple object is an object that does not come from "new"
   var isSimpleObject = function(value) {
     return Object.getPrototypeOf(Object.getPrototypeOf(value)) === null;
@@ -103,15 +112,6 @@ Backbone.SuperModel = (function(_, Backbone){
     relations: {},
     unsafeAttributes: [],
     name: null, // set name so that children can refer back to
-
-    _setupBackref: function(instance, options) {
-      var name = _.result(this, 'name');
-      // respect the attribute with the same name in relation
-      if (name && !instance[name]) {
-        instance[name] = this;
-      }
-      return instance;
-    },
 
     _valueForCollection: function(value) {
       if (_.isArray(value)) {
@@ -138,7 +138,7 @@ Backbone.SuperModel = (function(_, Backbone){
           //var relation = Backbone.Model;
           var relation = getRelation(obj, key, value);
           var instance = new relation();
-          obj.attributes[key] = this._setupBackref(instance, options);
+          obj.attributes[key] = setupBackref(obj, instance, options);
         }
         obj = obj.attributes[key];
       }
@@ -161,7 +161,7 @@ Backbone.SuperModel = (function(_, Backbone){
             _relation = Collection;
           }
           var collection = new _relation(value);
-          collection = this._setupBackref(collection, options);
+          collection = setupBackref(obj, collection, options);
           obj.attributes[finalPath] = collection;
         } else {
           // prevent duplicated events due to "set"
