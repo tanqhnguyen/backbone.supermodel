@@ -387,6 +387,25 @@ describe('Backbone.SuperModel', function(){
     should(anotherZoo.get('animals').zoo).be.an.instanceOf(Zoo);
     should(anotherZoo.get('animals').zoo.cid).equal(anotherZoo.cid);
     should(anotherZoo.get('owner').zoo.cid).equal(anotherZoo.cid);
+
+    // how about this nested structure?
+    var zoo = {
+      animals: [
+        {
+          name: 'duck'
+        },
+        {
+          name: 'platypus'
+        }
+      ]
+    };
+
+    var zooKeeper = new ZooKeeper({
+      zoo: zoo
+    });
+
+    should(zooKeeper.get('zoo').zooKeeper).be.an.instanceOf(ZooKeeper);
+    should(zooKeeper.get('zoo.animals').zoo).be.an.instanceOf(Zoo);
   });
 
   it("toJSON()", function(){
