@@ -74,6 +74,26 @@ Backbone.SuperModel = (function(_, Backbone){
     }
   };
 
+  var getRelation = function(obj, attr, value) {
+    var relation;
+
+    if (attr) {
+      var relations = _.result(obj, 'relations');
+      relation = relations[attr];
+    }
+
+    if (value && !relation) {
+      relation = Model;
+    }
+
+    // catch all the weird stuff
+    if (relation == void 0) {
+      relation = Model;
+    }
+
+    return relation;
+  };
+
   // a simple object is an object that does not come from "new"
   var isSimpleObject = function(value) {
     return Object.getPrototypeOf(Object.getPrototypeOf(value)) === null;
@@ -83,26 +103,6 @@ Backbone.SuperModel = (function(_, Backbone){
     relations: {},
     unsafeAttributes: [],
     name: null, // set name so that children can refer back to
-
-    _getRelation: function(attr, value) {
-      var relation;
-
-      if (attr) {
-        var relations = _.result(this, 'relations');
-        relation = relations[attr];
-      }
-
-      if (value && !relation) {
-        relation = Model;
-      }
-
-      // catch all the weird stuff
-      if (typeof(relation) == 'undefined') {
-        relation = Model;
-      }
-
-      return relation;
-    },
 
     _setupBackref: function(instance, options) {
       var name = _.result(this, 'name');
@@ -136,7 +136,7 @@ Backbone.SuperModel = (function(_, Backbone){
         if (!check) {
           // initiate the relationship here
           //var relation = Backbone.Model;
-          var relation = this._getRelation(key, value);
+          var relation = getRelation(obj, key, value);
           var instance = new relation();
           obj.attributes[key] = this._setupBackref(instance, options);
         }
@@ -153,7 +153,7 @@ Backbone.SuperModel = (function(_, Backbone){
       } else {
         if (this._valueForCollection(value)) {
           // here we need to initiate the collection manually
-          var _relation = this._getRelation(finalPath, value);
+          var _relation = getRelation(obj, finalPath, value);
 
           if (_relation.prototype instanceof Backbone.Model) {
             // if we dont have the Collection relation for this, use custom Collection

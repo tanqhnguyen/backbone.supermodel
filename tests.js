@@ -23,6 +23,15 @@ var Zoo = SuperModel.extend({
     'animals': Animals
   }
 });
+
+var ZooKeeper = SuperModel.extend({
+  name: 'zooKeeper',
+
+  relations: {
+    'zoo': Zoo
+  }
+});
+
 describe('Backbone.SuperModel', function(){
   beforeEach(function(){
     this.zoo = new Zoo();
@@ -268,6 +277,18 @@ describe('Backbone.SuperModel', function(){
 
     this.zoo.set('animals', animals);
     should(this.zoo.get('animals')).be.an.instanceOf(Animals);
+
+    var zoo = {
+      animals: animals
+    };
+
+    var zooKeeper = new ZooKeeper({
+      zoo: zoo
+    });
+
+    should(zooKeeper.get('zoo')).be.an.instanceOf(Zoo);
+    should(zooKeeper.get('zoo.animals')).be.an.instanceOf(Animals);
+    should(zooKeeper.get('zoo.animals').size()).be.equal(2);
   });
 
   it('escape()', function(){
