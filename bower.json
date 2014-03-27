@@ -1,0 +1,21 @@
+{
+    "name": "backbone.supermodel",
+    "version": "1.1.12",
+    "main": "src/backbone.supermodel.js",
+    "ignore": [
+        "source",
+        "spec",
+        ".bowerrc",
+        ".gitignore",
+        ".jshintignore",
+        ".jshintrc",
+        "bower.json",
+        "gruntfile.js",
+        "package.json",
+        "README.md"
+    ],
+    "dependencies": {
+        "backbone": ">=1.1.0",
+        "underscore": ">=1.5.0"
+    }
+}
