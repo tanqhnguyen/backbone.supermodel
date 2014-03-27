@@ -220,7 +220,10 @@ Running benchmark supermodel_setget [benchmarks/supermodel_setget.js]...
 It is obviously slower than the original `Backbone.Model`
 
 # Development
-`Gruntfile.js` and `package.json` are your friends
+`Gruntfile.js`, `package.json` and `bower.json` are your friends
+
+# Contributors
+https://github.com/laoshanlung/backbone.supermodel/graphs/contributors
 
 # License
 MIT
