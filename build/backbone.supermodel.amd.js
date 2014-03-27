@@ -178,9 +178,7 @@
             if (path.length == 1) {
               obj.attributes[finalPath] = value;
             } else {
-              options.skipNested = true;
-              options.forceChange = true;
-              obj.set(finalPath, value, options);
+              obj.set(finalPath, value, _.extend({skipNested: true, forceChange: true}, options));
             }
           }
         }
@@ -365,6 +363,7 @@
   
     return Model;
   })(_, Backbone);
+  
   return Backbone.SuperModel;
 
 }));
