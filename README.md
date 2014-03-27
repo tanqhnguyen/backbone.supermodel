@@ -7,6 +7,11 @@ Super as in fashion supermodel, not supernatural power. `SuperModel` extend `Bac
 npm install backbone.supermodel
 ```
 
+### Using bower
+```
+bower install backbone.supermodel
+```
+
 ### Using AMD script loader
 * Copy `build/backbone.supermodel.amd.js` to your project
 * Load it with `require(['path/to/backbone.supermodel.amd'], function(SuperModel){})` and make sure that your have `underscore` and `backbone` stup correctly
