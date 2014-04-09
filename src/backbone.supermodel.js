@@ -344,6 +344,7 @@ Backbone.SuperModel = (function(_, Backbone){
           this.unset(key);
         }
       }
+      return this;
     }
   });
 
