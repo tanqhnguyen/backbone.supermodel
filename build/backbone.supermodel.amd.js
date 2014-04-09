@@ -354,6 +354,7 @@
             this.unset(key);
           }
         }
+        return this;
       }
     });
   
