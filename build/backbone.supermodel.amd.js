@@ -115,7 +115,7 @@
   
     // a simple object is an object that does not come from "new"
     var isSimpleObject = function(value) {
-      return Object.getPrototypeOf(Object.getPrototypeOf(value)) === null;
+      return value.constructor === Object;
     };
   
     var Model = Backbone.Model.extend({
