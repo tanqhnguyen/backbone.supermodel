@@ -288,7 +288,7 @@
       },
   
       get: function(attr) {
-        var nestedAttrs = attr.split('.');
+        var nestedAttrs = attr ? attr.split('.') : [];
   
         if (nestedAttrs.length > 1) {
           var nestedAttr = this.attributes[_.first(nestedAttrs)];
