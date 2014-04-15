@@ -135,6 +135,12 @@ describe('Backbone.SuperModel', function(){
     should(this.zoo.get('location.address')).be.eql('address');
   });
 
+  it('sets {}', function(){
+    this.zoo.set('a', {});
+    
+    should(this.zoo.get('a')).be.an.instanceOf(SuperModel);
+  });
+
   it('sets array', function(){
     var locations = [
         {

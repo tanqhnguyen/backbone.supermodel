@@ -154,11 +154,17 @@
         }
   
         var finalPath = path[lastKeyIndex];
+  
         if (!_.isArray(value) && _.isObject(value) && isSimpleObject(value)) {
-          for (var j in value) {
-            var newPath = finalPath + '.' + j;
-            // let _nestedSet do its things
-            obj._nestedSet(newPath, value[j], options);
+          // special case when the object value is empty, just set it to an empty model
+          if (_.size(value) === 0) {
+            obj.attributes[finalPath] = new Model();
+          } else {
+            for (var j in value) {
+              var newPath = finalPath + '.' + j;
+              // let _nestedSet do its things
+              obj._nestedSet(newPath, value[j], options);
+            }
           }
         } else {
           if (this._valueForCollection(value)) {
