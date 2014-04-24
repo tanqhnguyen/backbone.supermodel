@@ -69,9 +69,8 @@ Backbone.SuperModel = (function(_, Backbone){
 
     if (nestedModel instanceof Backbone.Model) {
       walkNestedAttributes(nestedModel, _.rest(keyPath), doThing);
-    } else {
-      doThing(model, keyPath);
     }
+    doThing(model, keyPath);
   };
 
   var getRelation = function(obj, attr, value) {
@@ -105,7 +104,7 @@ Backbone.SuperModel = (function(_, Backbone){
 
   // a simple object is an object that does not come from "new"
   var isSimpleObject = function(value) {
-    return Object.getPrototypeOf(Object.getPrototypeOf(value)) === null;
+    return value.constructor === Object;
   };
 
   var Model = Backbone.Model.extend({
@@ -144,11 +143,17 @@ Backbone.SuperModel = (function(_, Backbone){
       }
 
       var finalPath = path[lastKeyIndex];
+
       if (!_.isArray(value) && _.isObject(value) && isSimpleObject(value)) {
-        for (var j in value) {
-          var newPath = finalPath + '.' + j;
-          // let _nestedSet do its things
-          obj._nestedSet(newPath, value[j], options);
+        // special case when the object value is empty, just set it to an empty model
+        if (_.size(value) === 0) {
+          obj.attributes[finalPath] = new Model();
+        } else {
+          for (var j in value) {
+            var newPath = finalPath + '.' + j;
+            // let _nestedSet do its things
+            obj._nestedSet(newPath, value[j], options);
+          }
         }
       } else {
         if (this._valueForCollection(value)) {
@@ -168,9 +173,7 @@ Backbone.SuperModel = (function(_, Backbone){
           if (path.length == 1) {
             obj.attributes[finalPath] = value;
           } else {
-            options.skipNested = true;
-            options.forceChange = true;
-            obj.set(finalPath, value, options);
+            obj.set(finalPath, value, _.extend({skipNested: true, forceChange: true}, options));
           }
         }
       }
@@ -280,7 +283,7 @@ Backbone.SuperModel = (function(_, Backbone){
     },
 
     get: function(attr) {
-      var nestedAttrs = attr.split('.');
+      var nestedAttrs = attr ? attr.split('.') : [];
 
       if (nestedAttrs.length > 1) {
         var nestedAttr = this.attributes[_.first(nestedAttrs)];
@@ -346,6 +349,7 @@ Backbone.SuperModel = (function(_, Backbone){
           this.unset(key);
         }
       }
+      return this;
     }
   });
 
