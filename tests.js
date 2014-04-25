@@ -314,6 +314,22 @@ describe('Backbone.SuperModel', function(){
     should(this.zoo.hasChanged('nested.value')).be.ok;
   });
 
+  it('unsets normal 2-level nested attributes', function(){
+    this.zoo.set('nested.value', 'test');
+    this.zoo.unset('nested');
+    should(this.zoo.has('nested')).not.be.ok;
+    should(this.zoo.hasChanged('nested')).be.ok;
+  });
+
+  it('unsets normal 3-level nested attributes', function(){
+    this.zoo.set('location.map.lat', -9000);
+    this.zoo.unset('location.map');
+    should(this.zoo.has('location.map')).not.be.ok;
+    should(this.zoo.hasChanged('location.map')).be.ok;
+    should(this.zoo.has('location')).be.ok;
+    should(this.zoo.hasChanged('location')).be.ok;
+  });
+
   it('can be used with Backbone.Collection normally', function(){
     var animals = new Backbone.Collection();
     var dog = new Animal({

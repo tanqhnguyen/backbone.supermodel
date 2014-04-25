@@ -79,9 +79,8 @@
   
       if (nestedModel instanceof Backbone.Model) {
         walkNestedAttributes(nestedModel, _.rest(keyPath), doThing);
-      } else {
-        doThing(model, keyPath);
       }
+      doThing(model, keyPath);
     };
   
     var getRelation = function(obj, attr, value) {
