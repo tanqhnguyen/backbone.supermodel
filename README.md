@@ -64,13 +64,29 @@ wallet.money.amout = 0; // this won't affect the data inside SuperModel
 * If the path points to a collection, the value is set as a key of the collection itself
         
 
-### Support change events
-There are only 2 change events are fired, one for the top level (`myStuff` in this case) and the other one is for the last level (`wallet.money` in this case). The main reason is to discourage the use of deep nested model, and to simplify the implementation (hence an increase in the performance). The same idea applied to other change related methods such 
+### Support nested change events
+Although it is not recommended to have deep-nested models, SuperModel supports it anyway. There are several change events when using `set`. Note that, the deeper the path goes, the more events will be fired. Therefore, be careful when using deep nested paths.
 
 ```js
-myStuff.set('wallet.money.amount', 6000); // will fire 2 different events
-view.listenTo(myStuff, 'change:wallet.money.amount', view.doThing);
+// receive 6000 as the changed value
+view.listenTo(myStuff, 'change:wallet.money.amount', view.doThing); 
+
+// receive myStull.get('wallet.money') as the changed value
+view.listenTo(myStuff, 'change:wallet.money', view.doThing);
+
+// receive myStull.get('wallet') as the changed value
+view.listenTo(myStuff, 'change:wallet', view.doThing);
+
+// receive myStull.get('wallet.money') as the changed value
+view.listenTo(myStull.get('wallet'), 'change:money', view.doThing);
+
+// receive 6000 as the changed value
+view.listenTo(myStull.get('wallet'), 'change:money.amount', view.doThing);
+
+// receive 6000 as the changed value
 view.listenTo(myStuff.get('wallet.money'), 'change:amount', view.doThing);
+
+myStuff.set('wallet.money.amount', 6000);
 ```
 
 ### `toJSON`
