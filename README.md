@@ -205,6 +205,7 @@ user.get('posts').at(0).user.get('username'); // return 'supermodel'
 * Support as many `Backbone.Model` methods as possible
 * ~~Support relations~~
 * ~~Support back reference~~
+* Implement `getRelation` to replace the current way of accessing relations
 * Improve performance
 
 # Benchmarks
