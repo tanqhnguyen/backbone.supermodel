@@ -33,7 +33,11 @@ Backbone.SuperModel = (function(_, Backbone){
 
       for (var l = 0; l < paths.length; l++) {
         var _p = paths[l];
-        target.trigger('change:'+_p, target, target.get(_p));
+        var trigger = target.trigger;
+
+        if (trigger && _.isFunction(trigger)) {
+          trigger.call(target, 'change:'+_p, target, target.get(_p));
+        }
       }               
     }
   };
