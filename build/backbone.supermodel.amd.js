@@ -9,6 +9,45 @@
 }(this, function (_, Backbone) {
 
   Backbone.SuperModel = (function(_, Backbone){
+    var _triggerNestedEvents = function(path) {
+      for (var m = path.length - 1; m >= 0; m--) {
+        // splits the path into 2 different array
+        var p = path.slice(0, m); // the target path of the events
+        var q = path.slice(m); // an array of the remaining paths which will be used to form events
+  
+        if (q.length == 1) {
+          // this case has been handled by the normal set
+          continue;
+        }
+  
+        // identifies the target
+        p = p.join('.');
+        var target = this;
+        if (p.length > 0) {
+          target = this.get(p);
+        }
+  
+        // based on the remaining paths, form an array of all possible events
+        // ['a', 'b', 'c'] results in 3 possible events a, a.b, a.b.c
+        var tmp = _.first(q);
+        var rest = _.rest(q);
+        var paths = [tmp];
+        for (var n = 0; n < rest.length; n++) {
+          // the case when we have the main object triggers event with the longest path
+          // has been handled by obj.set(finalPath)
+          if (paths.length + 1 < path.length) {
+            tmp = [tmp, rest[n]].join('.');
+            paths.push(tmp);              
+          }
+        }
+  
+        for (var l = 0; l < paths.length; l++) {
+          var _p = paths[l];
+          target.trigger('change:'+_p, target, target.get(_p));
+        }               
+      }
+    };
+  
     var processKeyPath = function(keyPath) {
       if (_.isString(keyPath)) {
         keyPath = keyPath.split('.');
@@ -138,9 +177,12 @@
   
         var lastKeyIndex = path.length - 1;
         var obj = this;
+        var previousObj = null;
+        var previousKey = null;
   
         for (var i = 0; i < lastKeyIndex; ++i) {
           var key = path[i];
+          
           var check = obj.attributes[key];
           if (!check) {
             // initiate the relationship here
@@ -186,6 +228,10 @@
               obj.set(finalPath, value, _.extend({skipNested: true, forceChange: true}, options));
             }
           }
+        }
+  
+        if (!options.silent) {
+          _triggerNestedEvents.call(this, path);
         }
       },
   

@@ -2,6 +2,7 @@ var should = require('should')
   , _ = require('underscore')._
   , Backbone = require('backbone')
   , SuperModel = require('./')
+  , sinon = require('sinon')
 
 var Owner = SuperModel.extend({
   name: 'owner'
@@ -241,32 +242,86 @@ describe('Backbone.SuperModel', function(){
 
   it('supports normal change events on the main model', function(){
     var bla = 'bla bla bla';
-    this.zoo.on('change:something.else', function(model, newValue){
-      should(model.hasChanged('something.else')).be.ok;
-      should(newValue).equal(bla);
-      should(model.get('something.else')).equal(bla);
-    }, this)
-    .set('something.else', bla);
+
+    var spy = sinon.spy();
+
+    this.zoo.on('change:something.else', spy);
+    this.zoo.set('something.else', bla);
+
+    should(spy.calledWith(this.zoo, bla)).be.ok;
   });
 
   it('supports change events on the nested model', function(){
     var bla = 'bla bla bla';
+
+    var spy = sinon.spy();
+
     this.zoo.set('something.else', 123);
-    this.zoo.get('something').on('change:else', function(model, newValue){
-      should(model.get('else')).equal(bla);
-    }, this);
+    this.zoo.get('something').on('change:else', spy);
     this.zoo.set('something.else', bla);
+
+    should(spy.calledWith(this.zoo.get('something'), bla)).be.ok;
   });
 
-  it('supports change events on the second level nested model', function(){
+  it('supports change events on the deep nested model', function(){
     var bla = 'bla bla bla';
-    this.zoo.set('some.other.thing', 123);
-    this.zoo.get('some').on('change:other.thing', function(model, newValue){
-      should(model.get('other.thing')).equal(bla);
-    }, this);
 
-    this.zoo.set('some.other.thing', bla);
+    var spies = [];
+
+    _.each(_.range(10), function(){
+      spies.push(sinon.spy());
+    });
+
+    this.zoo.set('a.b.c.d', 123);
+
+    this.zoo.on('change:a', spies[0]);
+    this.zoo.on('change:a.b', spies[1]);
+    this.zoo.on('change:a.b.c', spies[2]);
+    this.zoo.on('change:a.b.c.d', spies[3]);
+
+    this.zoo.get('a').on('change:b', spies[4]);
+    this.zoo.get('a').on('change:b.c', spies[5]);
+    this.zoo.get('a').on('change:b.c.d', spies[6]);
+    
+    this.zoo.get('a.b').on('change:c', spies[7]);
+    this.zoo.get('a.b').on('change:c.d', spies[8]);
+
+    this.zoo.get('a.b.c').on('change:d', spies[9]);
+
+    this.zoo.set('a.b.c.d', bla);
+
+    should(spies[0].calledWith(this.zoo, this.zoo.get('a'))).be.true;
+    should(spies[1].calledWith(this.zoo, this.zoo.get('a.b'))).be.true;
+    should(spies[2].calledWith(this.zoo, this.zoo.get('a.b.c'))).be.true;
+    should(spies[3].calledWith(this.zoo, bla)).be.true;
+
+    should(spies[4].calledWith(this.zoo.get('a'), this.zoo.get('a.b'))).be.true;
+    should(spies[5].calledWith(this.zoo.get('a'), this.zoo.get('a.b.c'))).be.true;
+    should(spies[6].calledWith(this.zoo.get('a'), bla)).be.true;
+
+    should(spies[7].calledWith(this.zoo.get('a.b'), this.zoo.get('a.b.c'))).be.true;
+    should(spies[8].calledWith(this.zoo.get('a.b'), bla)).be.true;
+
+    should(spies[9].calledWith(this.zoo.get('a.b.c'), bla)).be.true;
+
+    _.each(spies, function(spy){
+      spy.callCount.should.be.equal(1);
+    });
   });
+
+  // it('delegates change events', function(){
+  //   var bla = 'bla bla bla';
+
+  //   var spy = sinon.spy();
+
+  //   this.zoo.on('change:something.else', spy);
+
+  //   this.zoo.set('something', {
+  //     'else': bla
+  //   });
+
+  //   should(spy.calledWith(this.zoo, bla)).be.ok;
+  // });
 
   it('supports relations', function(){
     var animals = [
@@ -570,4 +625,5 @@ describe('Backbone.SuperModel', function(){
       silent: true
     });
   });
+
 });
