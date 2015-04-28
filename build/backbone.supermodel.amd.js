@@ -9,7 +9,7 @@
 }(this, function (_, Backbone) {
 
   Backbone.SuperModel = (function(_, Backbone){
-    var _triggerNestedEvents = function(path) {
+    var _triggerNestedChanges = function(path) {
       for (var m = path.length - 1; m >= 0; m--) {
         // splits the path into 2 different array
         var p = path.slice(0, m); // the target path of the events
@@ -33,12 +33,8 @@
         var rest = _.rest(q);
         var paths = [tmp];
         for (var n = 0; n < rest.length; n++) {
-          // the case when we have the main object triggers event with the longest path
-          // has been handled by obj.set(finalPath)
-          if (paths.length + 1 < path.length) {
-            tmp = [tmp, rest[n]].join('.');
-            paths.push(tmp);              
-          }
+          tmp = [tmp, rest[n]].join('.');
+          paths.push(tmp);
         }
   
         for (var l = 0; l < paths.length; l++) {
@@ -235,7 +231,7 @@
         }
   
         if (!options.silent) {
-          _triggerNestedEvents.call(this, path);
+          _triggerNestedChanges.call(this, path);
         }
       },
   
@@ -250,7 +246,13 @@
           if (!changeValue) {
             changeValue = this.get(changes[i]);
           }
-          this.trigger('change:' + changes[i], this, changeValue, options);
+  
+          // should only handle single attribute change event here
+          // change events for nested attributes should be handled by
+          // _triggerNestedChanges
+          if (changes[i].split('.').length == 1) {
+            this.trigger('change:' + changes[i], this, changeValue, options);
+          }
         }
       },
   
